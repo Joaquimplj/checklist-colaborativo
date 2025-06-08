@@ -6,6 +6,10 @@
     <title>Checklist Colaborativo Gateway Payments</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Firebase Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
         :root {
             --dark-bg: #0f172a;
@@ -825,6 +829,20 @@
     </div>
     
     <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyC4AvQhbrrwPWBdMq5-9yavPNrRvwSeOkI",
+          authDomain: "colaborativo-5101b.firebaseapp.com",
+          projectId: "colaborativo-5101b",
+          storageBucket: "colaborativo-5101b.firebasestorage.app",
+          messagingSenderId: "740509496300",
+          appId: "1:740509496300:web:3e147ecb3755a3d191c6c9",
+          measurementId: "G-XGGV9ZS8LZ"
+        };
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        
         document.addEventListener('DOMContentLoaded', function() {
             const syncStatus = document.querySelector('.sync-status');
             let completedCount = 0;
@@ -899,47 +917,49 @@
                     // Simular sincronização com o amigo
                     showSyncStatus('Alteração sincronizada com seu amigo');
                     
-                    // Salvar estado no localStorage
+                    // Salvar estado no Firebase
                     saveState();
                 });
             });
             
-            // Salvar estado no localStorage
+            // Salvar estado no Firebase
             function saveState() {
                 const state = {};
-                
                 document.querySelectorAll('.task-card').forEach(card => {
                     const taskId = card.dataset.id;
                     state[taskId] = card.classList.contains('completed');
                 });
-                
-                localStorage.setItem('gatewayChecklist', JSON.stringify(state));
+                db.ref('gatewayChecklist').set(state);
             }
             
-            // Carregar estado salvo
+            // Carregar estado salvo do Firebase
             function loadState() {
-                const savedState = localStorage.getItem('gatewayChecklist');
-                if (savedState) {
-                    const state = JSON.parse(savedState);
-                    
+                db.ref('gatewayChecklist').on('value', (snapshot) => {
+                    const state = snapshot.val() || {};
+                    completedCount = 0;
                     document.querySelectorAll('.task-card').forEach(card => {
                         const taskId = card.dataset.id;
                         if (state[taskId]) {
                             card.classList.add('completed');
                             const checkbox = card.querySelector('.task-checkbox');
                             checkbox.classList.add('checked');
-                            
-                            const completedBy = document.createElement('div');
-                            completedBy.className = `completed-by user1`;
-                            completedBy.innerHTML = '<span class="user-dot"></span> Concluído por você';
-                            card.appendChild(completedBy);
-                            
+                            if (!card.querySelector('.completed-by')) {
+                                const completedBy = document.createElement('div');
+                                completedBy.className = `completed-by user1`;
+                                completedBy.innerHTML = '<span class="user-dot"></span> Concluído';
+                                card.appendChild(completedBy);
+                            }
                             completedCount++;
+                        } else {
+                            card.classList.remove('completed');
+                            const checkbox = card.querySelector('.task-checkbox');
+                            checkbox.classList.remove('checked');
+                            const completedBy = card.querySelector('.completed-by');
+                            if (completedBy) completedBy.remove();
                         }
                     });
-                    
                     updateStats();
-                }
+                });
             }
             
             // Botão para copiar link de compartilhamento
@@ -970,36 +990,6 @@
                     howToModal.style.display = 'none';
                 }
             });
-            
-            // Simular atividade do amigo
-            setInterval(() => {
-                // Simular que o amigo completou uma tarefa
-                if (Math.random() > 0.9) {
-                    const randomTask = document.querySelectorAll('.task-card:not(.completed)');
-                    if (randomTask.length > 0) {
-                        const task = randomTask[Math.floor(Math.random() * randomTask.length)];
-                        task.classList.add('completed');
-                        const checkbox = task.querySelector('.task-checkbox');
-                        checkbox.classList.add('checked');
-                        
-                        let completedBy = task.querySelector('.completed-by');
-                        if (!completedBy) {
-                            completedBy = document.createElement('div');
-                            completedBy.className = 'completed-by user2';
-                            completedBy.innerHTML = '<span class="user-dot"></span> Concluído por seu amigo';
-                            task.appendChild(completedBy);
-                        }
-                        
-                        completedCount++;
-                        updateStats();
-                        showSyncStatus('Seu amigo completou uma tarefa!');
-                    }
-                }
-                
-                // Atualizar status do amigo
-                const user2Dot = document.querySelector('.user-badge.user2 .status-dot');
-                user2Dot.classList.toggle('active');
-            }, 8000);
             
             // Filtro de categorias
             document.querySelectorAll('.category-btn').forEach(btn => {
