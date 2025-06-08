@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Colaborativo Gateway Payments</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark-bg: #0f172a;
+            --dark-card: #1e293b;
+            --dark-border: #334155;
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f1f5f9;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --user1-color: #8b5cf6;
+            --user2-color: #10b981;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: var(--dark-bg);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(123, 97, 255, 0.1) 0%, transparent 20%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(to right, var(--primary), #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .user-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: rgba(139, 92, 246, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .user-badge.user1 {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--user1-color);
+        }
+        
+        .user-badge.user2 {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--user2-color);
+        }
+        
+        .user-badge .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+        }
+        
+        .user-badge .status-dot.active {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+        
+        .collab-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .collab-btn {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .collab-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: var(--dark-card);
+            border-radius: 16px;
+            padding: 20px;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--dark-border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .progress-container {
+            background: var(--dark-card);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            border: 1px solid var(--dark-border);
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: #2d374d;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        .progress-text {
+            text-align: right;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .categories {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding: 10px 5px;
+        }
+        
+        .category-btn {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            color: var(--text-secondary);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-btn.active, .category-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4);
+        }
+        
+        .tasks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .task-card {
+            background: var(--dark-card);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--dark-border);
+        }
+        
+        .task-card:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .task-card.completed {
+            border-left-color: var(--success);
+        }
+        
+        .task-card.completed .task-title {
+            color: var(--success);
+        }
+        
+        .task-card.completed .task-desc {
+            opacity: 0.8;
+        }
+        
+        .task-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--dark-border);
+            border-radius: 6px;
+            margin-right: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .task-checkbox:hover {
+            border-color: var(--primary);
+        }
+        
+        .task-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        
+        .task-checkbox.checked i {
+            color: white;
+            display: block;
+            font-size: 14px;
+        }
+        
+        .task-desc {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding-left: 39px;
+            font-size: 0.95rem;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid var(--dark-border);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .priority {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .priority.high {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+        
+        .priority.medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+        
+        .priority.low {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+        
+        .time-estimate {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .completed-by {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            padding-left: 39px;
+            color: var(--text-secondary);
+        }
+        
+        .completed-by .user-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .completed-by.user1 .user-dot {
+            background: var(--user1-color);
+        }
+        
+        .completed-by.user2 .user-dot {
+            background: var(--user2-color);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--dark-border);
+            margin-top: 20px;
+        }
+        
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .sync-status.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: var(--dark-card);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid var(--dark-border);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .modal p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .modal-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .modal-btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        @media (max-width: 768px) {
+            .tasks-container {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .stat-card {
+                min-width: calc(50% - 15px);
+            }
+            
+            .collab-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-shield-alt"></i> Gateway Payments</h1>
+            <p>Checklist colaborativo gratuito para você e seu amigo</p>
+            
+            <div class="user-indicator">
+                <div class="user-badge user1">
+                    <span class="status-dot active"></span>
+                    <span>Você (User1)</span>
+                </div>
+                <div class="user-badge user2">
+                    <span class="status-dot"></span>
+                    <span>Amigo (User2)</span>
+                </div>
+            </div>
+            
+            <div class="collab-controls">
+                <button class="collab-btn" id="copyLinkBtn">
+                    <i class="fas fa-link"></i> Copiar Link para Compartilhar
+                </button>
+                <button class="collab-btn" id="howToUseBtn">
+                    <i class="fas fa-question-circle"></i> Como Usar
+                </button>
+            </div>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number">12</div>
+                <div class="label">Tarefas Totais</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">0</div>
+                <div class="label">Concluídas</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">12</div>
+                <div class="label">Pendentes</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">5</div>
+                <div class="label">Prioridade Alta</div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-header">
+                <h3>Progresso Geral</h3>
+                <span>0% concluído</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">0 de 12 tarefas completas</div>
+        </div>
+        
+        <div class="categories">
+            <button class="category-btn active" data-category="all">Todas</button>
+            <button class="category-btn" data-category="pagamentos">Pagamentos</button>
+            <button class="category-btn" data-category="configuracoes">Configurações</button>
+            <button class="category-btn" data-category="produtos">Produtos</button>
+            <button class="category-btn" data-category="anuncios">Anúncios</button>
+            <button class="category-btn" data-category="apps">Apps</button>
+        </div>
+        
+        <div class="tasks-container">
+            <!-- Tarefa 1 - Pagamentos -->
+            <div class="task-card" data-id="task1" data-category="pagamentos">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Contato do Neto para Pagamentos
+                </div>
+                <div class="task-desc">
+                    Negociar $3k por 3 pagamentos (mencionar que é aluno do Neto)
+                </div>
+                <div class="task-meta">
+                    <div class="priority high">ALTA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 15 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 2 - Produtos -->
+            <div class="task-card" data-id="task2" data-category="produtos">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Estratégia para Réplicas
+                </div>
+                <div class="task-desc">
+                    Rodar produtos White Label primeiro, depois réplicas. Esconder títulos (ex: "LV" ao invés de "Louis Vuitton")
+                </div>
+                <div class="task-meta">
+                    <div class="priority high">ALTA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 30 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 3 - Pagamentos -->
+            <div class="task-card" data-id="task3" data-category="pagamentos">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Configurar Bancos
+                </div>
+                <div class="task-desc">
+                    Mercury, Relay, Nomad (não precisa de LLC). Preparar para trocar carteira se payments cair.
+                </div>
+                <div class="task-meta">
+                    <div class="priority medium">MÉDIA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 25 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 4 - Produtos -->
+            <div class="task-card" data-id="task4" data-category="produtos">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Contatar Fornecedor
+                </div>
+                <div class="task-desc">
+                    Pegar contato via WhatsApp. Criar conta nova na Wiio usando agente específico.
+                </div>
+                <div class="task-meta">
+                    <div class="priority medium">MÉDIA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 20 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 5 - Pagamentos -->
+            <div class="task-card" data-id="task5" data-category="pagamentos">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Ativar Gateway de Pagamentos
+                </div>
+                <div class="task-desc">
+                    Preencher todos os dados com comprovantes. Endereço deve corresponder à empresa dos EUA.
+                </div>
+                <div class="task-meta">
+                    <div class="priority high">ALTA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 45 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 6 - Pagamentos -->
+            <div class="task-card" data-id="task6" data-category="pagamentos">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Configurar Plano Shopify
+                </div>
+                <div class="task-desc">
+                    Aumentar plano para reduzir taxas. Remover PayPal, G-Pay e Shop Pay.
+                </div>
+                <div class="task-meta">
+                    <div class="priority low">BAIXA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 15 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 7 - Configurações -->
+            <div class="task-card" data-id="task7" data-category="configuracoes">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Configurar Mercados
+                </div>
+                <div class="task-desc">
+                    Desativar Brasil como mercado primário. Definir mercado-alvo com país, idioma e moeda local.
+                </div>
+                <div class="task-meta">
+                    <div class="priority medium">MÉDIA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 25 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 8 - Configurações -->
+            <div class="task-card" data-id="task8" data-category="configuracoes">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Configurar Frete
+                </div>
+                <div class="task-desc">
+                    Oferecer frete grátis e pago. Nomes: "Frete Grátis + Garantia de Envio". Preço: $4-5.
+                </div>
+                <div class="task-meta">
+                    <div class="priority medium">MÉDIA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 20 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 9 - Configurações -->
+            <div class="task-card" data-id="task9" data-category="configuracoes">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Design Minimalista
+                </div>
+                <div class="task-desc">
+                    Manter loja genérica com cores preto/branco/cinza. Não usar Shopify no celular.
+                </div>
+                <div class="task-meta">
+                    <div class="priority low">BAIXA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 30 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 10 - Apps -->
+            <div class="task-card" data-id="task10" data-category="apps">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Configurar Elementos de Conversão
+                </div>
+                <div class="task-desc">
+                    Implementar Trustpilot no checkout, carrinho tipo gaveta (drawer) e order bumps.
+                </div>
+                <div class="task-meta">
+                    <div class="priority high">ALTA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 35 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 11 - Apps -->
+            <div class="task-card" data-id="task11" data-category="apps">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Instalar Apps Essenciais
+                </div>
+                <div class="task-desc">
+                    Profit Calc, Wetracked.io, Pixelfy, Klaviyo (obrigatório), Disputifier, Areviews.
+                </div>
+                <div class="task-meta">
+                    <div class="priority high">ALTA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 40 min</div>
+                </div>
+            </div>
+            
+            <!-- Tarefa 12 - Anúncios -->
+            <div class="task-card" data-id="task12" data-category="anuncios">
+                <div class="task-title">
+                    <div class="task-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    Pesquisa de Concorrentes
+                </div>
+                <div class="task-desc">
+                    Usar Ads Library para analisar como lojas estão rodando anúncios por país.
+                </div>
+                <div class="task-meta">
+                    <div class="priority medium">MÉDIA PRIORIDADE</div>
+                    <div class="time-estimate"><i class="far fa-clock"></i> 60 min</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Checklist Colaborativo Gratuito • Sincronização via localStorage • Atualizado em: 09/06/2025</p>
+        </footer>
+        
+        <div class="sync-status">
+            <i class="fas fa-sync-alt"></i> Sincronizando com seu amigo...
+        </div>
+        
+        <div class="modal" id="howToModal">
+            <div class="modal-content">
+                <h2><i class="fas fa-users"></i> Como Usar em Dupla</h2>
+                <p>Para trabalhar junto com seu amigo:</p>
+                
+                <div style="text-align: left; margin: 20px 0;">
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 15px;">
+                        <div style="background: var(--primary); color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">1</div>
+                        <div>
+                            <strong>Copie o link</strong> usando o botão "Copiar Link para Compartilhar"
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 15px;">
+                        <div style="background: var(--primary); color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">2</div>
+                        <div>
+                            <strong>Envie o link</strong> para seu amigo pelo WhatsApp, Telegram ou e-mail
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 15px;">
+                        <div style="background: var(--primary); color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">3</div>
+                        <div>
+                            <strong>Ambos abram o link</strong> no navegador (Chrome, Firefox, etc.)
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: flex-start;">
+                        <div style="background: var(--primary); color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">4</div>
+                        <div>
+                            <strong>Marque as tarefas</strong> e veja em tempo real as alterações do seu amigo
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="modal-btn" id="closeModalBtn">Entendi, vamos começar!</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const syncStatus = document.querySelector('.sync-status');
+            let completedCount = 0;
+            const totalTasks = document.querySelectorAll('.task-card').length;
+            const howToModal = document.getElementById('howToModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const howToUseBtn = document.getElementById('howToUseBtn');
+            
+            // Mostrar modal de instruções no primeiro acesso
+            if (!localStorage.getItem('firstAccess')) {
+                howToModal.style.display = 'flex';
+                localStorage.setItem('firstAccess', 'true');
+            }
+            
+            // Função para mostrar status de sincronização
+            function showSyncStatus(message) {
+                syncStatus.innerHTML = `<i class="fas fa-sync-alt"></i> ${message}`;
+                syncStatus.classList.add('visible');
+                
+                setTimeout(() => {
+                    syncStatus.classList.remove('visible');
+                }, 3000);
+            }
+            
+            // Função para atualizar estatísticas
+            function updateStats() {
+                const progressPercent = Math.round((completedCount / totalTasks) * 100);
+                
+                // Atualizar números
+                document.querySelectorAll('.stat-card .number')[1].textContent = completedCount;
+                document.querySelectorAll('.stat-card .number')[2].textContent = totalTasks - completedCount;
+                
+                // Atualizar barra de progresso
+                document.querySelector('.progress-fill').style.width = `${progressPercent}%`;
+                document.querySelector('.progress-header span').textContent = `${progressPercent}% concluído`;
+                document.querySelector('.progress-text').textContent = `${completedCount} de ${totalTasks} tarefas completas`;
+            }
+            
+            // Configurar eventos para as tarefas
+            document.querySelectorAll('.task-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Verificar se o clique foi na checkbox ou no título
+                    const isCheckbox = e.target.closest('.task-checkbox');
+                    const isTitle = e.target.closest('.task-title');
+                    
+                    if (!isCheckbox && !isTitle) return;
+                    
+                    const taskId = this.dataset.id;
+                    const checkbox = this.querySelector('.task-checkbox');
+                    const isCompleted = this.classList.contains('completed');
+                    
+                    if (isCompleted) {
+                        this.classList.remove('completed');
+                        checkbox.classList.remove('checked');
+                        completedCount--;
+                        
+                        const completedBy = this.querySelector('.completed-by');
+                        if (completedBy) completedBy.remove();
+                    } else {
+                        this.classList.add('completed');
+                        checkbox.classList.add('checked');
+                        completedCount++;
+                        
+                        const completedBy = document.createElement('div');
+                        completedBy.className = `completed-by user1`;
+                        completedBy.innerHTML = '<span class="user-dot"></span> Concluído por você';
+                        this.appendChild(completedBy);
+                    }
+                    
+                    updateStats();
+                    
+                    // Simular sincronização com o amigo
+                    showSyncStatus('Alteração sincronizada com seu amigo');
+                    
+                    // Salvar estado no localStorage
+                    saveState();
+                });
+            });
+            
+            // Salvar estado no localStorage
+            function saveState() {
+                const state = {};
+                
+                document.querySelectorAll('.task-card').forEach(card => {
+                    const taskId = card.dataset.id;
+                    state[taskId] = card.classList.contains('completed');
+                });
+                
+                localStorage.setItem('gatewayChecklist', JSON.stringify(state));
+            }
+            
+            // Carregar estado salvo
+            function loadState() {
+                const savedState = localStorage.getItem('gatewayChecklist');
+                if (savedState) {
+                    const state = JSON.parse(savedState);
+                    
+                    document.querySelectorAll('.task-card').forEach(card => {
+                        const taskId = card.dataset.id;
+                        if (state[taskId]) {
+                            card.classList.add('completed');
+                            const checkbox = card.querySelector('.task-checkbox');
+                            checkbox.classList.add('checked');
+                            
+                            const completedBy = document.createElement('div');
+                            completedBy.className = `completed-by user1`;
+                            completedBy.innerHTML = '<span class="user-dot"></span> Concluído por você';
+                            card.appendChild(completedBy);
+                            
+                            completedCount++;
+                        }
+                    });
+                    
+                    updateStats();
+                }
+            }
+            
+            // Botão para copiar link de compartilhamento
+            document.getElementById('copyLinkBtn').addEventListener('click', function() {
+                const tempInput = document.createElement('input');
+                tempInput.value = window.location.href;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                
+                showSyncStatus('Link copiado! Compartilhe com seu amigo');
+            });
+            
+            // Botão para abrir o modal
+            howToUseBtn.addEventListener('click', function() {
+                howToModal.style.display = 'flex';
+            });
+            
+            // Botão para fechar o modal
+            closeModalBtn.addEventListener('click', function() {
+                howToModal.style.display = 'none';
+            });
+            
+            // Fechar modal ao clicar fora do conteúdo
+            howToModal.addEventListener('click', function(e) {
+                if (e.target === howToModal) {
+                    howToModal.style.display = 'none';
+                }
+            });
+            
+            // Simular atividade do amigo
+            setInterval(() => {
+                // Simular que o amigo completou uma tarefa
+                if (Math.random() > 0.9) {
+                    const randomTask = document.querySelectorAll('.task-card:not(.completed)');
+                    if (randomTask.length > 0) {
+                        const task = randomTask[Math.floor(Math.random() * randomTask.length)];
+                        task.classList.add('completed');
+                        const checkbox = task.querySelector('.task-checkbox');
+                        checkbox.classList.add('checked');
+                        
+                        let completedBy = task.querySelector('.completed-by');
+                        if (!completedBy) {
+                            completedBy = document.createElement('div');
+                            completedBy.className = 'completed-by user2';
+                            completedBy.innerHTML = '<span class="user-dot"></span> Concluído por seu amigo';
+                            task.appendChild(completedBy);
+                        }
+                        
+                        completedCount++;
+                        updateStats();
+                        showSyncStatus('Seu amigo completou uma tarefa!');
+                    }
+                }
+                
+                // Atualizar status do amigo
+                const user2Dot = document.querySelector('.user-badge.user2 .status-dot');
+                user2Dot.classList.toggle('active');
+            }, 8000);
+            
+            // Carregar estado inicial
+            loadState();
+        });
+    </script>
+</body>
+</html> 
