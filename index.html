@@ -1001,6 +1001,25 @@
                 user2Dot.classList.toggle('active');
             }, 8000);
             
+            // Filtro de categorias
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover classe 'active' de todos os botões
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    // Adicionar classe 'active' ao botão clicado
+                    this.classList.add('active');
+
+                    const categoria = this.getAttribute('data-category');
+                    document.querySelectorAll('.task-card').forEach(card => {
+                        if (categoria === 'all' || card.getAttribute('data-category') === categoria) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
             // Carregar estado inicial
             loadState();
         });
